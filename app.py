@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import requests
+from datetime import datetime
 
 # ── 페이지 설정 ────────────────────────────────────────────────────
 st.set_page_config(page_title="주문·리뷰 통합 대시보드", layout="wide", page_icon="📊")
@@ -109,6 +111,76 @@ st.markdown("""
   <p>주문 기본 정보와 리뷰 데이터를 업로드하면 자동으로 병합하여 분석합니다.</p>
 </div>
 """, unsafe_allow_html=True)
+
+# ── 서울 날씨 (Open-Meteo) ────────────────────────────────────────
+@st.cache_data(ttl=600)
+def fetch_seoul_weather():
+    url = (
+        "https://api.open-meteo.com/v1/forecast"
+        "?latitude=37.5665&longitude=126.9780"
+        "&current=temperature_2m"
+        "&hourly=temperature_2m"
+        "&timezone=Asia%2FSeoul"
+        "&forecast_days=1"
+    )
+    resp = requests.get(url, timeout=10)
+    resp.raise_for_status()
+    return resp.json()
+
+try:
+    weather = fetch_seoul_weather()
+    current_temp = weather["current"]["temperature_2m"]
+    hours = weather["hourly"]["time"]          # "2025-06-25T00:00" 형식
+    temps = weather["hourly"]["temperature_2m"]
+
+    now_hour = datetime.now().hour
+    hour_labels = [h.split("T")[1] for h in hours]   # "00:00" ~ "23:00"
+
+    st.markdown("<div class='section-card'>", unsafe_allow_html=True)
+    st.markdown("<div class='section-title'>🌡️ 서울 현재 날씨 (Open-Meteo)</div>", unsafe_allow_html=True)
+
+    w_col1, w_col2 = st.columns([1, 3], gap="large")
+
+    with w_col1:
+        st.markdown(f"""
+        <div style="text-align:center; padding: 1.5rem 0;">
+            <div style="font-size:3.5rem; font-weight:800; color:#4f6ef7;">{current_temp}°C</div>
+            <div style="font-size:.9rem; color:#888; margin-top:.4rem;">서울 현재 기온</div>
+            <div style="font-size:.8rem; color:#aaa; margin-top:.2rem;">{datetime.now().strftime('%Y-%m-%d %H:%M')} 기준</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with w_col2:
+        fig_w = go.Figure()
+        fig_w.add_trace(go.Scatter(
+            x=hour_labels, y=temps,
+            mode="lines+markers",
+            line=dict(color="#4f6ef7", width=2.5),
+            marker=dict(size=5, color="#4f6ef7"),
+            fill="tozeroy",
+            fillcolor="rgba(79,110,247,0.08)",
+            hovertemplate="%{x}<br>%{y}°C<extra></extra>",
+        ))
+        fig_w.add_vline(
+            x=hour_labels[now_hour],
+            line_dash="dot", line_color="#f03e3e", line_width=1.5,
+            annotation_text="현재", annotation_position="top",
+        )
+        fig_w.update_layout(
+            plot_bgcolor="white", paper_bgcolor="white",
+            margin=dict(t=20, b=20, l=0, r=0),
+            xaxis=dict(title="시간", gridcolor="#f0f0f0", tickangle=-45),
+            yaxis=dict(title="기온 (°C)", gridcolor="#f0f0f0"),
+            height=260,
+        )
+        st.plotly_chart(fig_w, use_container_width=True)
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+except Exception as e:
+    st.warning(f"날씨 데이터를 불러오지 못했습니다: {e}")
+
+st.markdown("<div style='margin-bottom:1.5rem'></div>", unsafe_allow_html=True)
 
 # ── 사이드바: 파일 업로드 ─────────────────────────────────────────
 with st.sidebar:
