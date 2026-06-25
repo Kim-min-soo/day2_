@@ -11,6 +11,26 @@ st.set_page_config(page_title="주문·리뷰 통합 대시보드", layout="wide
 # ── 전역 CSS ──────────────────────────────────────────────────────
 st.markdown("""
 <style>
+/* ── 전역 텍스트 색상 ── */
+html, body, [class*="css"], .stApp, .main, .block-container,
+p, span, div, li, label, h1, h2, h3, h4, h5, h6,
+[data-testid="stText"], [data-testid="stMarkdown"],
+[data-testid="stCaptionContainer"] {
+    color: #1e1e2e !important;
+}
+/* Streamlit 기본 위젯 텍스트 */
+.stSelectbox label, .stMultiSelect label,
+.stFileUploader label, .stCheckbox label,
+.stRadio label, .stSlider label,
+.stTextInput label, .stNumberInput label,
+[data-testid="stWidgetLabel"] { color: #1e1e2e !important; }
+/* 선택 입력 내부 텍스트 */
+[data-baseweb="select"] [data-testid="stMarkdown"],
+[data-baseweb="input"] { color: #1e1e2e !important; }
+/* info / warning / success 배너 */
+[data-testid="stAlert"] p,
+[data-testid="stAlert"] { color: #1e1e2e !important; }
+
 [data-testid="stAppViewContainer"] {
     background: linear-gradient(135deg, #f0f4ff 0%, #fafbff 100%);
 }
@@ -29,7 +49,8 @@ st.markdown("""
     color: #1e1e2e !important;
 }
 /* 멀티셀렉트 선택 태그 텍스트는 흰색 유지 */
-[data-testid="stSidebar"] [data-baseweb="tag"] span {
+[data-testid="stSidebar"] [data-baseweb="tag"] span,
+[data-baseweb="tag"] span {
     color: #ffffff !important;
 }
 /* 파일 업로더 드래그 영역: 배경을 밝게, 텍스트를 어둡게 */
@@ -67,8 +88,8 @@ st.markdown("""
     margin-bottom: 1.5rem;
     color: white;
 }
-.hero-card h1 { margin: 0 0 .25rem 0; font-size: 2rem; font-weight: 700; }
-.hero-card p  { margin: 0; opacity: .8; font-size: .95rem; }
+.hero-card h1 { margin: 0 0 .25rem 0; font-size: 2rem; font-weight: 700; color: white !important; }
+.hero-card p  { margin: 0; opacity: .9; font-size: .95rem; color: white !important; }
 
 .kpi-card {
     background: white;
@@ -78,11 +99,11 @@ st.markdown("""
     border-left: 5px solid #4f6ef7;
 }
 .kpi-label {
-    font-size: .8rem; color: #888; font-weight: 600;
+    font-size: .8rem; color: #555 !important; font-weight: 600;
     text-transform: uppercase; letter-spacing: .05em; margin-bottom: .3rem;
 }
-.kpi-value { font-size: 1.9rem; font-weight: 800; color: #1e1e2e; line-height: 1; }
-.kpi-sub   { font-size: .8rem; color: #4f6ef7; margin-top: .3rem; }
+.kpi-value { font-size: 1.9rem; font-weight: 800; color: #1e1e2e !important; line-height: 1; }
+.kpi-sub   { font-size: .8rem; color: #4f6ef7 !important; margin-top: .3rem; }
 
 .section-card {
     background: white;
@@ -92,7 +113,7 @@ st.markdown("""
     margin-bottom: 1.2rem;
 }
 .section-title {
-    font-size: 1rem; font-weight: 700; color: #1e1e2e;
+    font-size: 1rem; font-weight: 700; color: #1e1e2e !important;
     margin-bottom: 1rem; display: flex; align-items: center; gap: .4rem;
 }
 [data-baseweb="tag"] { background-color: #4f6ef7 !important; }
@@ -101,6 +122,11 @@ st.markdown("""
     color: #4f6ef7 !important;
     font-weight: 700 !important;
 }
+/* 데이터프레임 셀 텍스트 */
+[data-testid="stDataFrame"] td,
+[data-testid="stDataFrame"] { color: #1e1e2e !important; }
+/* 다운로드 버튼 */
+[data-testid="stDownloadButton"] button { color: #1e1e2e !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -146,8 +172,8 @@ try:
         st.markdown(f"""
         <div style="text-align:center; padding: 1.5rem 0;">
             <div style="font-size:3.5rem; font-weight:800; color:#4f6ef7;">{current_temp}°C</div>
-            <div style="font-size:.9rem; color:#888; margin-top:.4rem;">서울 현재 기온</div>
-            <div style="font-size:.8rem; color:#aaa; margin-top:.2rem;">{datetime.now().strftime('%Y-%m-%d %H:%M')} 기준</div>
+            <div style="font-size:.9rem; color:#444; margin-top:.4rem;">서울 현재 기온</div>
+            <div style="font-size:.8rem; color:#666; margin-top:.2rem;">{datetime.now().strftime('%Y-%m-%d %H:%M')} 기준</div>
         </div>
         """, unsafe_allow_html=True)
 
