@@ -135,6 +135,7 @@ try:
 
     now_hour = datetime.now().hour
     hour_labels = [h.split("T")[1] for h in hours]   # "00:00" ~ "23:00"
+    x_indices = list(range(len(hour_labels)))         # 0 ~ 23 (숫자 축)
 
     st.markdown("<div class='section-card'>", unsafe_allow_html=True)
     st.markdown("<div class='section-title'>🌡️ 서울 현재 날씨 (Open-Meteo)</div>", unsafe_allow_html=True)
@@ -153,23 +154,27 @@ try:
     with w_col2:
         fig_w = go.Figure()
         fig_w.add_trace(go.Scatter(
-            x=hour_labels, y=temps,
+            x=x_indices, y=temps,
             mode="lines+markers",
             line=dict(color="#4f6ef7", width=2.5),
             marker=dict(size=5, color="#4f6ef7"),
             fill="tozeroy",
             fillcolor="rgba(79,110,247,0.08)",
-            hovertemplate="%{x}<br>%{y}°C<extra></extra>",
+            customdata=hour_labels,
+            hovertemplate="%{customdata}<br>%{y}°C<extra></extra>",
         ))
         fig_w.add_vline(
-            x=hour_labels[now_hour],
+            x=now_hour,
             line_dash="dot", line_color="#f03e3e", line_width=1.5,
             annotation_text="현재", annotation_position="top",
         )
         fig_w.update_layout(
             plot_bgcolor="white", paper_bgcolor="white",
             margin=dict(t=20, b=20, l=0, r=0),
-            xaxis=dict(title="시간", gridcolor="#f0f0f0", tickangle=-45),
+            xaxis=dict(
+                title="시간", gridcolor="#f0f0f0", tickangle=-45,
+                tickvals=x_indices[::2], ticktext=hour_labels[::2],
+            ),
             yaxis=dict(title="기온 (°C)", gridcolor="#f0f0f0"),
             height=260,
         )
